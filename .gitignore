@@ -1,0 +1,79 @@
+# Virtual Environment
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Temporary upload folder
+uploads/
+
+# IDE settings
+.vscode/
+
+
+**2. Create a `requirements.txt` file:**
+This file is the Python equivalent of `package.json`. It lists all the libraries that someone else would need to install to run your project.
+
+* Open your terminal in your project folder.
+* Make sure your virtual environment is active (you should see `(venv)` at the start of your prompt).
+* Run this single command:
+
+    ```bash
+    pip freeze > requirements.txt
+    ```
+This command will automatically create a `requirements.txt` file with all the necessary libraries listed.
+
+---
+### Step 3: Push Your Code to GitHub
+
+Now, you just need to run the standard Git commands in your terminal.
+
+1.  **Initialize Git:**
+    ```bash
+    git init
+    ```
+
+2.  **Add all your files:**
+    ```bash
+    git add .
+    ```
+
+3.  **Make your first commit:**
+    ```bash
+    git commit -m "Initial commit: Add all project files and models"
+    ```
+
+4.  **Connect your local folder to your GitHub repository:**
+    Go to the GitHub page for your new repository and copy the URL. It will look something like `https://github.com/your-username/Smart-Agriculture-WebApp.git`.
+    ```bash
+    git remote add origin <YOUR_REPOSITORY_URL>
+    ```
+
+5.  **Rename the main branch:**
+    ```bash
+    git branch -M main
+    ```
+
+6.  **Push your code to GitHub:**
+    ```bash
+    git push -u origin main
+    ```
+
+After you run these commands, refresh your GitHub page. You will see all your project files there!
+
+---
+### Final Recommendation: Add a Professional README
+
+A `README` file is the front page of your project on GitHub. It's the first thing your professor will see. I have created a professional `README.md` file for you that explains the project, its features, and how to run it.
+
+
+http://googleusercontent.com/immersive_entry_chip/0
+
+You can copy the content of this file, create a `README.md` file in your project folder, and paste it in. After you do that, you can add and push it to GitHub with these commands:
+```bash
+git add README.md
+git commit -m "Add project README"
+git push
+
+Congratulations on completing this fantastic project!
