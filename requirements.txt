@@ -6,3 +6,8 @@ joblib
 requests
 openpyxl
 gunicorn
+lime
+shap
+opencv-python
+matplotlib
+Pillow

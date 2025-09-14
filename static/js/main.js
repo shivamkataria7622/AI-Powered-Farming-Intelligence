@@ -370,7 +370,7 @@ window.previewImage = function(type) {
 
 // ==================== API FUNCTIONS ====================
 
-// Enhanced prediction function with better UI feedback
+// Enhanced prediction function with XAI explanations
 window.predictImage = async function(type) {
     const resultDiv = document.getElementById(`${type}Result`);
     const loader = document.getElementById(`${type}Loader`);
@@ -411,8 +411,20 @@ window.predictImage = async function(type) {
             resultDiv.innerHTML = createErrorCard(data.error);
         } else {
             const confidencePercent = (data.confidence * 100).toFixed(1);
-            resultDiv.innerHTML = createResultCard(data.prediction, confidencePercent, type);
+            let resultHTML = createResultCard(data.prediction, confidencePercent, type);
+            
+            // Add XAI explanation if available
+            if (data.xai) {
+                resultHTML += createXAIExplanation(data.xai, type);
+            }
+            
+            resultDiv.innerHTML = resultHTML;
             showToast(`Analysis complete: ${data.prediction}`, 'success');
+            
+            // Animate feature importance bars if present
+            setTimeout(() => {
+                animateFeatureBars();
+            }, 500);
         }
     } catch (error) {
         console.error('Prediction error:', error);
@@ -468,7 +480,7 @@ function createErrorCard(error) {
     `;
 }
 
-// Enhanced crop recommendation
+// Enhanced crop recommendation with XAI
 window.recommendCrop = async function() {
     const resultDiv = document.getElementById('recommendResult');
     const loader = document.getElementById('recommendLoader');
@@ -498,8 +510,20 @@ window.recommendCrop = async function() {
             showToast(`Error: ${resultData.error}`, 'error');
             resultDiv.innerHTML = createErrorCard(resultData.error);
         } else {
-            resultDiv.innerHTML = createCropRecommendationCard(resultData.recommendations);
+            let resultHTML = createCropRecommendationCard(resultData.recommendations);
+            
+            // Add XAI explanation if available
+            if (resultData.xai) {
+                resultHTML += createCropXAIExplanation(resultData.xai);
+            }
+            
+            resultDiv.innerHTML = resultHTML;
             showToast('Crop recommendations generated!', 'success');
+            
+            // Animate feature importance bars if present
+            setTimeout(() => {
+                animateFeatureBars();
+            }, 500);
         }
     } catch (error) {
         console.error('Recommendation error:', error);
@@ -752,6 +776,252 @@ window.getMarketPrices = async function() {
         button.innerHTML = originalText;
     }
 };
+
+// ==================== XAI EXPLANATION FUNCTIONS ====================
+
+// Create XAI explanation HTML for image predictions
+function createXAIExplanation(xai, type) {
+    const confidenceClass = xai.confidence > 0.8 ? 'confidence-high' : 
+                           xai.confidence > 0.6 ? 'confidence-medium' : 'confidence-low';
+    
+    let html = `
+        <div class="xai-explanation" id="xai-${type}">
+            <div class="xai-header">
+                <div class="xai-icon">🧠</div>
+                <div>
+                    <h3 class="xai-title">AI Explanation</h3>
+                    <div class="confidence-indicator">
+                        <div class="confidence-circle ${confidenceClass}"></div>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                            ${xai.confidence > 0.8 ? 'High' : xai.confidence > 0.6 ? 'Medium' : 'Low'} Confidence Prediction
+                        </span>
+                    </div>
+                </div>
+            </div>
+    `;
+    
+    // Add visualization if available
+    if (xai.explanation_image) {
+        html += `
+            <div class="xai-visualization">
+                <img src="data:image/png;base64,${xai.explanation_image}" 
+                     alt="AI Analysis Visualization" 
+                     class="xai-image">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mt-2 text-center">
+                    Visual analysis showing which parts of the image influenced the AI's decision
+                </p>
+            </div>
+        `;
+    }
+    
+    // Add farmer explanation
+    if (xai.farmer_explanation) {
+        html += `
+            <div class="farmer-explanation">
+                ${formatFarmerExplanation(xai.farmer_explanation)}
+            </div>
+        `;
+    }
+    
+    // Add key factors
+    if (xai.key_factors && xai.key_factors.length > 0) {
+        html += `
+            <div class="feature-importance">
+                <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                    🔍 Key Factors Analyzed
+                </h4>
+        `;
+        
+        xai.key_factors.forEach((factor, index) => {
+            const importancePercent = Math.round(factor.importance * 100);
+            html += `
+                <div class="importance-item">
+                    <div class="flex-shrink-0">
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            ${factor.factor}
+                        </span>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            ${factor.description}
+                        </p>
+                    </div>
+                    <div class="importance-bar">
+                        <div class="importance-fill" 
+                             data-width="${importancePercent}" 
+                             style="--fill-width: ${importancePercent}%"></div>
+                    </div>
+                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        ${importancePercent}%
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+    
+    html += `</div>`;
+    return html;
+}
+
+// Create XAI explanation HTML for crop recommendations
+function createCropXAIExplanation(xai) {
+    let html = `
+        <div class="xai-explanation" id="xai-crop">
+            <div class="xai-header">
+                <div class="xai-icon">🧠</div>
+                <div>
+                    <h3 class="xai-title">Why These Recommendations?</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Understanding the AI's decision process
+                    </p>
+                </div>
+            </div>
+    `;
+    
+    // Add farmer explanation
+    if (xai.farmer_explanation) {
+        html += `
+            <div class="farmer-explanation">
+                ${formatFarmerExplanation(xai.farmer_explanation)}
+            </div>
+        `;
+    }
+    
+    // Add feature importance
+    if (xai.feature_importance && xai.feature_importance.length > 0) {
+        html += `
+            <div class="feature-importance">
+                <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                    📊 Most Important Factors
+                </h4>
+        `;
+        
+        xai.feature_importance.forEach((feature, index) => {
+            const importancePercent = Math.round(feature.importance * 100);
+            const statusClass = `feature-status ${feature.status}`;
+            
+            html += `
+                <div class="importance-item">
+                    <div class="flex-shrink-0">
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            ${feature.feature}
+                        </span>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">
+                                Value: ${feature.value}
+                            </span>
+                            <span class="${statusClass}">${feature.status}</span>
+                        </div>
+                    </div>
+                    <div class="importance-bar">
+                        <div class="importance-fill" 
+                             data-width="${importancePercent}" 
+                             style="--fill-width: ${importancePercent}%"></div>
+                    </div>
+                    <div class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        ${importancePercent}%
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+    
+    // Add environmental factors
+    if (xai.environmental_factors && xai.environmental_factors.length > 0) {
+        html += `
+            <div class="recommendation-factors">
+                <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3 col-span-full">
+                    🌍 Environmental Analysis
+                </h4>
+        `;
+        
+        xai.environmental_factors.forEach(factor => {
+            html += `
+                <div class="factor-card">
+                    <div class="factor-header">
+                        <span class="factor-title">${factor.factor}</span>
+                        <span class="factor-value">${factor.value}</span>
+                    </div>
+                    <p class="factor-impact">${factor.impact}</p>
+                    <p class="factor-recommendation">${factor.recommendation}</p>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+    
+    // Add farming recommendations
+    if (xai.recommendations && xai.recommendations.length > 0) {
+        html += `
+            <div class="farming-recommendations">
+                <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                    💡 Farming Recommendations
+                </h4>
+        `;
+        
+        xai.recommendations.forEach(rec => {
+            const priorityClass = `recommendation-priority ${rec.priority}`;
+            const priorityIcon = rec.priority === 'high' ? '🔴' : 
+                                rec.priority === 'medium' ? '🟡' : '🟢';
+            
+            html += `
+                <div class="recommendation-item">
+                    <div class="flex-shrink-0">
+                        <span class="${priorityClass}">${priorityIcon} ${rec.priority}</span>
+                    </div>
+                    <div class="flex-grow">
+                        <h5 class="font-medium text-gray-900 dark:text-gray-100">
+                            ${rec.category}
+                        </h5>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                            ${rec.recommendation}
+                        </p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+    }
+    
+    html += `</div>`;
+    return html;
+}
+
+// Format farmer explanation with markdown-like formatting
+function formatFarmerExplanation(explanation) {
+    return explanation
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold text
+        .replace(/^(#{1,6})\s*(.*?)$/gm, '<h$1>$2</h$1>')  // Headers
+        .replace(/•\s*(.*?)$/gm, '<li>$1</li>')            // List items
+        .replace(/^\d+\.\s*(.*?)$/gm, '<li>$1</li>')       // Numbered list
+        .replace(/\n\n/g, '</p><p>')                       // Paragraphs
+        .replace(/\n/g, '<br>')                            // Line breaks
+        .replace(/^/, '<p>')                               // Start paragraph
+        .replace(/$/, '</p>');                             // End paragraph
+}
+
+// Animate feature importance bars
+function animateFeatureBars() {
+    const bars = document.querySelectorAll('.importance-fill');
+    bars.forEach((bar, index) => {
+        setTimeout(() => {
+            const width = bar.dataset.width || '0';
+            bar.style.width = width + '%';
+        }, index * 200);
+    });
+}
+
+// Toggle XAI explanation visibility
+function toggleXAIExplanation(type) {
+    const xaiElement = document.getElementById(`xai-${type}`);
+    if (xaiElement) {
+        xaiElement.style.display = xaiElement.style.display === 'none' ? 'block' : 'none';
+    }
+}
 
 // ==================== UTILITY FUNCTIONS ====================
 

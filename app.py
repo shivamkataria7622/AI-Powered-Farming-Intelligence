@@ -10,6 +10,9 @@ import uuid
 import requests
 from datetime import datetime, timedelta
 
+# Import XAI module
+from xai_explanations import xai_explainer
+
 # Initialize the Flask application
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here-change-in-production'  # Set a proper secret key
@@ -109,7 +112,7 @@ def home():
 
 @app.route('/predict_disease', methods=['POST'])
 def predict_disease():
-    """Disease detection API endpoint"""
+    """Disease detection API endpoint with XAI explanations"""
     if not disease_model:
         return jsonify({'error': 'Disease model not available'}), 500
         
@@ -126,17 +129,37 @@ def predict_disease():
         processed_image = preprocess_image(filepath)
         prediction = disease_model.predict(processed_image)
         
-        # Clean up
-        os.remove(filepath)
-        
         # Extract results
         confidence = float(np.max(prediction))
         predicted_class = disease_class_names[np.argmax(prediction)]
+        formatted_prediction = predicted_class.replace('___', ' - ').replace('_', ' ')
         
-        return jsonify({
-            'prediction': predicted_class.replace('___', ' - ').replace('_', ' '),
+        # Generate XAI explanation
+        try:
+            xai_explanation = xai_explainer.explain_image_prediction(
+                disease_model, 
+                processed_image, 
+                confidence,
+                predicted_class,
+                model_type='disease'
+            )
+        except Exception as xai_error:
+            app.logger.warning(f"XAI explanation failed: {xai_error}")
+            xai_explanation = None
+        
+        # Clean up
+        os.remove(filepath)
+        
+        response_data = {
+            'prediction': formatted_prediction,
             'confidence': confidence
-        })
+        }
+        
+        # Add XAI explanation if available
+        if xai_explanation:
+            response_data['xai'] = xai_explanation
+            
+        return jsonify(response_data)
         
     except Exception as e:
         app.logger.error(f"Disease prediction error: {e}")
@@ -147,7 +170,7 @@ def predict_disease():
 
 @app.route('/predict_weed', methods=['POST'])
 def predict_weed():
-    """Weed detection API endpoint"""
+    """Weed detection API endpoint with XAI explanations"""
     if not weed_model:
         return jsonify({'error': 'Weed model not available'}), 500
         
@@ -164,17 +187,37 @@ def predict_weed():
         processed_image = preprocess_image(filepath)
         prediction = weed_model.predict(processed_image)
         
-        # Clean up
-        os.remove(filepath)
-        
         # Extract results
         confidence = float(np.max(prediction))
         predicted_class = weed_class_names[np.argmax(prediction)]
+        formatted_prediction = predicted_class.replace('_', ' ')
         
-        return jsonify({
-            'prediction': predicted_class.replace('_', ' '),
+        # Generate XAI explanation
+        try:
+            xai_explanation = xai_explainer.explain_image_prediction(
+                weed_model, 
+                processed_image, 
+                confidence,
+                predicted_class,
+                model_type='weed'
+            )
+        except Exception as xai_error:
+            app.logger.warning(f"XAI explanation failed: {xai_error}")
+            xai_explanation = None
+        
+        # Clean up
+        os.remove(filepath)
+        
+        response_data = {
+            'prediction': formatted_prediction,
             'confidence': confidence
-        })
+        }
+        
+        # Add XAI explanation if available
+        if xai_explanation:
+            response_data['xai'] = xai_explanation
+            
+        return jsonify(response_data)
         
     except Exception as e:
         app.logger.error(f"Weed prediction error: {e}")
@@ -185,7 +228,7 @@ def predict_weed():
 
 @app.route('/recommend_crop', methods=['POST'])
 def recommend_crop():
-    """Crop recommendation API endpoint"""
+    """Crop recommendation API endpoint with XAI explanations"""
     if not crop_recommendation_model:
         return jsonify({'error': 'Crop recommendation model not available'}), 500
         
@@ -214,7 +257,30 @@ def recommend_crop():
                 'confidence': round(confidence * 100, 2)
             })
         
-        return jsonify({'recommendations': recommendations})
+        # Generate XAI explanation
+        try:
+            # Extract feature names and values
+            feature_names = list(data.keys())
+            feature_values = list(data.values())
+            
+            xai_explanation = xai_explainer.explain_crop_recommendation(
+                crop_recommendation_model,
+                final_input,
+                feature_names,
+                recommendations,
+                feature_values
+            )
+        except Exception as xai_error:
+            app.logger.warning(f"XAI explanation failed: {xai_error}")
+            xai_explanation = None
+        
+        response_data = {'recommendations': recommendations}
+        
+        # Add XAI explanation if available
+        if xai_explanation:
+            response_data['xai'] = xai_explanation
+            
+        return jsonify(response_data)
         
     except Exception as e:
         app.logger.error(f"Crop recommendation error: {e}")
@@ -355,5 +421,7 @@ def internal_error(error):
     return render_template('base.html'), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Run on all network interfaces (0.0.0.0) to allow access from other devices
+    # Access from phone: http://172.16.112.111:5000
+    app.run(host='0.0.0.0', port=5000, debug=True)
 
