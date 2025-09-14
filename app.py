@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, flash, redirect, url_for
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 
 # Initialize the Flask application
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-here-change-in-production'  # Set a proper secret key
 
 # --- Create a folder for temporary uploads ---
 UPLOAD_FOLDER = 'uploads'
@@ -98,97 +99,211 @@ def preprocess_image(file_path, target_size=(128, 128)):
 
 @app.route('/')
 def home():
-    return render_template('index.html', states=all_states, fertilizer_crops=all_crops_for_fertilizer)
+    """Home page route"""
+    try:
+        return render_template('index.html', states=all_states, fertilizer_crops=all_crops_for_fertilizer)
+    except Exception as e:
+        app.logger.error(f"Error rendering home page: {e}")
+        flash('An error occurred loading the page. Please refresh.', 'error')
+        return render_template('index.html', states=[], fertilizer_crops=[])
 
 @app.route('/predict_disease', methods=['POST'])
 def predict_disease():
-    # ... (code remains the same)
-    if not disease_model: return jsonify({'error': 'Model not available'}), 500
+    """Disease detection API endpoint"""
+    if not disease_model:
+        return jsonify({'error': 'Disease model not available'}), 500
+        
     file = request.files.get('file')
-    if not file: return jsonify({'error': 'No file provided'}), 400
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()))
-    file.save(filepath)
-    processed_image = preprocess_image(filepath)
-    prediction = disease_model.predict(processed_image)
-    os.remove(filepath)
-    confidence = float(np.max(prediction))
-    predicted_class = disease_class_names[np.argmax(prediction)]
-    return jsonify({'prediction': predicted_class.replace('___', ' - ').replace('_', ' '), 'confidence': confidence})
+    if not file or file.filename == '':
+        return jsonify({'error': 'No file provided'}), 400
+        
+    try:
+        # Save temporarily
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()))
+        file.save(filepath)
+        
+        # Process image
+        processed_image = preprocess_image(filepath)
+        prediction = disease_model.predict(processed_image)
+        
+        # Clean up
+        os.remove(filepath)
+        
+        # Extract results
+        confidence = float(np.max(prediction))
+        predicted_class = disease_class_names[np.argmax(prediction)]
+        
+        return jsonify({
+            'prediction': predicted_class.replace('___', ' - ').replace('_', ' '),
+            'confidence': confidence
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Disease prediction error: {e}")
+        # Clean up file if it exists
+        if 'filepath' in locals() and os.path.exists(filepath):
+            os.remove(filepath)
+        return jsonify({'error': 'Failed to process image'}), 500
 
 @app.route('/predict_weed', methods=['POST'])
 def predict_weed():
-    # ... (code remains the same)
-    if not weed_model: return jsonify({'error': 'Model not available'}), 500
+    """Weed detection API endpoint"""
+    if not weed_model:
+        return jsonify({'error': 'Weed model not available'}), 500
+        
     file = request.files.get('file')
-    if not file: return jsonify({'error': 'No file provided'}), 400
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()))
-    file.save(filepath)
-    processed_image = preprocess_image(filepath)
-    prediction = weed_model.predict(processed_image)
-    os.remove(filepath)
-    confidence = float(np.max(prediction))
-    predicted_class = weed_class_names[np.argmax(prediction)]
-    return jsonify({'prediction': predicted_class.replace('_', ' '), 'confidence': confidence})
+    if not file or file.filename == '':
+        return jsonify({'error': 'No file provided'}), 400
+        
+    try:
+        # Save temporarily
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], str(uuid.uuid4()))
+        file.save(filepath)
+        
+        # Process image
+        processed_image = preprocess_image(filepath)
+        prediction = weed_model.predict(processed_image)
+        
+        # Clean up
+        os.remove(filepath)
+        
+        # Extract results
+        confidence = float(np.max(prediction))
+        predicted_class = weed_class_names[np.argmax(prediction)]
+        
+        return jsonify({
+            'prediction': predicted_class.replace('_', ' '),
+            'confidence': confidence
+        })
+        
+    except Exception as e:
+        app.logger.error(f"Weed prediction error: {e}")
+        # Clean up file if it exists
+        if 'filepath' in locals() and os.path.exists(filepath):
+            os.remove(filepath)
+        return jsonify({'error': 'Failed to process image'}), 500
 
 @app.route('/recommend_crop', methods=['POST'])
 def recommend_crop():
-    if not crop_recommendation_model: return jsonify({'error': 'Model not available'}), 500
+    """Crop recommendation API endpoint"""
+    if not crop_recommendation_model:
+        return jsonify({'error': 'Crop recommendation model not available'}), 500
+        
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        # Create input DataFrame
         input_df = pd.DataFrame([data])
         input_encoded = pd.get_dummies(input_df)
         final_input = input_encoded.reindex(columns=crop_model_features, fill_value=0)
         
+        # Get predictions
         probabilities = crop_recommendation_model.predict_proba(final_input)[0]
         class_names = crop_recommendation_model.classes_
         results = list(zip(class_names, probabilities))
         top_3_results = sorted(results, key=lambda x: x[1], reverse=True)[:3]
         
+        # Format recommendations
         recommendations = []
         for crop_code, confidence in top_3_results:
             full_name = CROP_MAP.get(crop_code, crop_code)
-            recommendations.append({'crop': full_name, 'confidence': round(confidence * 100, 2)})
+            recommendations.append({
+                'crop': full_name,
+                'confidence': round(confidence * 100, 2)
+            })
         
         return jsonify({'recommendations': recommendations})
+        
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f"Crop recommendation error: {e}")
+        return jsonify({'error': 'Failed to generate recommendations'}), 500
 
 @app.route('/get_live_weather', methods=['POST'])
 def get_live_weather():
-    # ... (code remains the same)
+    """Live weather API endpoint"""
     try:
         data = request.get_json()
+        if not data or 'lat' not in data or 'lon' not in data:
+            return jsonify({'error': 'Latitude and longitude required'}), 400
+            
         lat, lon = data['lat'], data['lon']
+        
+        # Call weather API
         url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min"
-        response = requests.get(url)
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        
         weather_data = response.json()
-        result = { "T2M_MAX": weather_data['daily']['temperature_2m_max'][0], "T2M_MIN": weather_data['daily']['temperature_2m_min'][0], "RH2M": weather_data['current']['relative_humidity_2m'], "PRECTOTCORR": weather_data['current']['precipitation'], "WS2M": weather_data['current']['wind_speed_10m'] }
+        
+        # Extract relevant data
+        result = {
+            "T2M_MAX": weather_data['daily']['temperature_2m_max'][0],
+            "T2M_MIN": weather_data['daily']['temperature_2m_min'][0],
+            "RH2M": weather_data['current']['relative_humidity_2m'],
+            "PRECTOTCORR": weather_data['current']['precipitation'],
+            "WS2M": weather_data['current']['wind_speed_10m']
+        }
+        
         return jsonify(result)
+        
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"Weather API error: {e}")
+        return jsonify({'error': 'Failed to fetch weather data'}), 500
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        app.logger.error(f"Weather processing error: {e}")
+        return jsonify({'error': 'Failed to process weather data'}), 500
 
 @app.route('/calculate_fertilizer', methods=['POST'])
 def calculate_fertilizer():
-    # ... (code remains the same)
+    """Fertilizer calculation API endpoint"""
     try:
         data = request.get_json()
-        crop, n_val, p_val, k_val = data['crop'], float(data['n']), float(data['p']), float(data['k'])
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+            
+        # Extract and validate data
+        crop = data.get('crop')
+        n_val = float(data.get('n', 0))
+        p_val = float(data.get('p', 0))
+        k_val = float(data.get('k', 0))
+        
+        if not crop:
+            return jsonify({'error': 'Crop selection required'}), 400
+            
+        # Get crop nutrient requirements
         recommendations = CROP_NUTRIENTS.get(crop)
-        if not recommendations: return jsonify({'error': 'Nutrient data not available for this crop.'}), 404
+        if not recommendations:
+            return jsonify({'error': f'Nutrient data not available for {crop}'}), 404
+            
+        # Calculate needed nutrients
         n_needed = max(0, recommendations['N'] - n_val)
         p_needed = max(0, recommendations['P'] - p_val)
         k_needed = max(0, recommendations['K'] - k_val)
-        return jsonify({ 'n_needed': round(n_needed, 2), 'p_needed': round(p_needed, 2), 'k_needed': round(k_needed, 2) })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
         
-# --- RESTORED LIVE API CALL for Market Prices ---
+        return jsonify({
+            'n_needed': round(n_needed, 2),
+            'p_needed': round(p_needed, 2),
+            'k_needed': round(k_needed, 2),
+            'crop': crop
+        })
+        
+    except ValueError:
+        return jsonify({'error': 'Invalid numeric values provided'}), 400
+    except Exception as e:
+        app.logger.error(f"Fertilizer calculation error: {e}")
+        return jsonify({'error': 'Failed to calculate fertilizer needs'}), 500
+# --- Market Prices API ---
 @app.route('/get_market_prices', methods=['POST'])
 def get_market_prices():
+    """Market prices API endpoint"""
     try:
         data = request.get_json()
+        if not data or 'state' not in data:
+            return jsonify({'error': 'State parameter required'}), 400
+            
         state_from_user = data['state']
-        
         api_state_name = STATE_MAP_PRICES.get(state_from_user, state_from_user)
         api_key = "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b"
         
@@ -196,28 +311,48 @@ def get_market_prices():
         url = (f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
                f"?api-key={api_key}&format=json&limit=1000&sort[arrival_date]=desc")
         
-        response = requests.get(url, timeout=20) # Added a timeout for safety
+        response = requests.get(url, timeout=20)
+        response.raise_for_status()
         price_data = response.json()
         
-        # Convert to a DataFrame and filter by state in our code
+        # Convert to DataFrame and filter by state
         all_records = pd.DataFrame(price_data.get('records', []))
         if all_records.empty:
             return jsonify({'prices': []})
 
         state_records_df = all_records[all_records['state'] == api_state_name]
 
-        final_records = [
-            {
-                'commodity': row.get('commodity'),
-                'market': row.get('market'),
-                'price': row.get('modal_price')
-            }
-            for index, row in state_records_df.head(100).iterrows()
-        ]
+        # Format results
+        final_records = []
+        for index, row in state_records_df.head(100).iterrows():
+            commodity = row.get('commodity', 'N/A')
+            market = row.get('market', 'N/A')
+            price = row.get('modal_price', 'N/A')
+            
+            final_records.append({
+                'commodity': commodity,
+                'market': market,
+                'price': price
+            })
         
         return jsonify({'prices': final_records})
+        
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"Market prices API error: {e}")
+        return jsonify({'error': 'Failed to fetch market prices from external API'}), 500
     except Exception as e:
-        return jsonify({'error': f'API Error: {str(e)}'}), 500
+        app.logger.error(f"Market prices processing error: {e}")
+        return jsonify({'error': 'Failed to process market prices'}), 500
+
+# --- Error Handlers ---
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('base.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    app.logger.error(f"Internal error: {error}")
+    return render_template('base.html'), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

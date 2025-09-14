@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Agriculture Assistant{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                            DEFAULT: '#16a34a',
+                            dark: '#15803d'
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'bounce-gentle': 'bounceGentle 2s infinite'
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(10px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        bounceGentle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="min-h-full bg-gradient-to-br from-gray-50 via-green-50 to-emerald-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 border-b border-green-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <a href="{{ url_for('home') }}" class="flex items-center gap-3 group">
+                    <div class="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                        <span class="text-white text-xl">🌱</span>
+                    </div>
+                    <div>
+                        <span class="text-xl font-bold bg-gradient-to-r from-brand-600 to-brand-700 bg-clip-text text-transparent">Smart Agriculture</span>
+                        <div class="text-xs text-gray-500 dark:text-gray-400 -mt-1">AI Assistant</div>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation -->
+                <nav class="hidden md:flex items-center space-x-1">
+                    <a href="{{ url_for('home') }}" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 transition-all duration-200">
+                        🏠 Home
+                    </a>
+                    <a href="#disease" onclick="showTab(event, 'disease')" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 transition-all duration-200">
+                        🩺 Disease
+                    </a>
+                    <a href="#weed" onclick="showTab(event, 'weed')" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 transition-all duration-200">
+                        🌿 Weeds
+                    </a>
+                    <a href="#recommend" onclick="showTab(event, 'recommend')" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 transition-all duration-200">
+                        🌾 Crop
+                    </a>
+                    <a href="#fertilizer" onclick="showTab(event, 'fertilizer')" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 transition-all duration-200">
+                        🧪 Fertilizer
+                    </a>
+                    <a href="#prices" onclick="showTab(event, 'prices')" class="nav-link px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 transition-all duration-200">
+                        💰 Market
+                    </a>
+                </nav>
+
+                <!-- Theme Toggle & Mobile Menu -->
+                <div class="flex items-center gap-3">
+                    <button id="themeToggle" class="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 shadow-sm hover:shadow-md" aria-label="Toggle dark mode">
+                        <span id="themeIcon" class="w-5 h-5 block">🌙</span>
+                    </button>
+                    
+                    <!-- Mobile Menu Button -->
+                    <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mobile Navigation -->
+            <div id="mobileMenu" class="md:hidden hidden border-t border-gray-200 dark:border-gray-700 py-3">
+                <div class="space-y-1">
+                    <a href="{{ url_for('home') }}" class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 rounded-lg">🏠 Home</a>
+                    <a href="#disease" onclick="showTab(event, 'disease')" class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 rounded-lg">🩺 Disease Detection</a>
+                    <a href="#weed" onclick="showTab(event, 'weed')" class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 rounded-lg">🌿 Weed Detection</a>
+                    <a href="#recommend" onclick="showTab(event, 'recommend')" class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 rounded-lg">🌾 Crop Recommendation</a>
+                    <a href="#fertilizer" onclick="showTab(event, 'fertilizer')" class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 rounded-lg">🧪 Fertilizer Calculator</a>
+                    <a href="#prices" onclick="showTab(event, 'prices')" class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-gray-800 rounded-lg">💰 Market Prices</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2">
+                    {% for category, message in messages %}
+                        <div class="toast max-w-sm p-4 rounded-lg shadow-lg border-l-4 bg-white dark:bg-gray-800 border-brand-500 animate-slide-up">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    {% if category == 'success' %}
+                                        <span class="text-green-500">✅</span>
+                                    {% elif category == 'error' %}
+                                        <span class="text-red-500">❌</span>
+                                    {% else %}
+                                        <span class="text-blue-500">ℹ️</span>
+                                    {% endif %}
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ message }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm border-t border-gray-200 dark:border-gray-700 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <div class="flex items-center justify-center gap-2 mb-4">
+                    <span class="text-2xl">🌱</span>
+                    <span class="text-lg font-semibold text-gray-900 dark:text-gray-100">Smart Agriculture Assistant</span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    Empowering farmers with AI-driven insights for better crop management and sustainable agriculture.
+                </p>
+                <div class="flex items-center justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+                    <span>© {{ moment().format('YYYY') if moment else '2025' }} Smart Agriculture</span>
+                    <span>•</span>
+                    <span>Made with ❤️ for farmers</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,338 +1,379 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Agriculture Assistant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .tab-button.active { border-color: #2563eb; color: #2563eb; }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            display: none; margin: 20px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl p-8 my-8">
-        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">Smart Agriculture Assistant</h1>
+{% extends "base.html" %}
+{% block title %}Home • Smart Agriculture Assistant{% endblock %}
 
-        <div class="border-b border-gray-200 mb-8">
-            <nav class="-mb-px flex justify-center space-x-6">
-                <button class="py-3 px-6 font-semibold text-gray-600 border-b-4 border-transparent transition-colors duration-300 tab-button active" onclick="showTab(event, 'disease')">Disease Detection</button>
-                <button class="py-3 px-6 font-semibold text-gray-600 border-b-4 border-transparent transition-colors duration-300 tab-button" onclick="showTab(event, 'weed')">Weed Detection</button>
-                <button class="py-3 px-6 font-semibold text-gray-600 border-b-4 border-transparent transition-colors duration-300 tab-button" onclick="showTab(event, 'recommend')">Crop Recommendation</button>
-                <button class="py-3 px-6 font-semibold text-gray-600 border-b-4 border-transparent transition-colors duration-300 tab-button" onclick="showTab(event, 'fertilizer')">Fertilizer Calculator</button>
-                <button class="py-3 px-6 font-semibold text-gray-600 border-b-4 border-transparent transition-colors duration-300 tab-button" onclick="showTab(event, 'prices')">Market Prices</button>
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-500 via-brand-600 to-emerald-600 text-white shadow-2xl mb-12">
+        <div class="absolute inset-0 bg-black opacity-10"></div>
+        <div class="relative px-8 py-16 sm:px-12 sm:py-20 lg:px-16">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="mb-6">
+                    <span class="inline-block text-6xl mb-4 animate-bounce-gentle">🌱</span>
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                    AI-Powered Farming
+                    <span class="block text-brand-100">Intelligence</span>
+                </h1>
+                <p class="text-lg sm:text-xl text-brand-50 mb-8 max-w-3xl mx-auto leading-relaxed">
+                    Transform your agricultural decisions with cutting-edge AI. Get instant crop recommendations, 
+                    detect plant diseases, identify weeds, and optimize your farming strategy with data-driven insights.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button onclick="showTab(event, 'disease')" class="inline-flex items-center gap-3 rounded-xl bg-white text-brand-600 hover:bg-brand-50 px-8 py-4 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                        🩺 Start Disease Detection
+                    </button>
+                    <button onclick="showTab(event, 'recommend')" class="inline-flex items-center gap-3 rounded-xl border-2 border-white/30 hover:bg-white/10 px-8 py-4 font-semibold text-lg transition-all duration-300">
+                        🌾 Get Crop Recommendations
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Decorative Elements -->
+        <div class="absolute -top-16 -right-16 w-32 h-32 bg-white/10 rounded-full"></div>
+        <div class="absolute -bottom-8 -left-8 w-24 h-24 bg-white/5 rounded-full"></div>
+    </section>
+
+    <!-- Enhanced Tab Navigation -->
+    <div id="features-section" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden scroll-target">
+        <!-- Tab Buttons -->
+        <div class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+            <nav class="flex overflow-x-auto scrollbar-hide">
+                <button class="tab-button active flex-shrink-0 py-4 px-6 font-medium text-gray-600 dark:text-gray-300 border-b-3 border-transparent transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap" onclick="showTab(event, 'disease')">
+                    <span class="flex items-center gap-2">
+                        🩺 <span class="hidden sm:inline">Disease Detection</span>
+                    </span>
+                </button>
+                <button class="tab-button flex-shrink-0 py-4 px-6 font-medium text-gray-600 dark:text-gray-300 border-b-3 border-transparent transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap" onclick="showTab(event, 'weed')">
+                    <span class="flex items-center gap-2">
+                        🌿 <span class="hidden sm:inline">Weed Detection</span>
+                    </span>
+                </button>
+                <button class="tab-button flex-shrink-0 py-4 px-6 font-medium text-gray-600 dark:text-gray-300 border-b-3 border-transparent transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap" onclick="showTab(event, 'recommend')">
+                    <span class="flex items-center gap-2">
+                        🌾 <span class="hidden sm:inline">Crop Recommendation</span>
+                    </span>
+                </button>
+                <button class="tab-button flex-shrink-0 py-4 px-6 font-medium text-gray-600 dark:text-gray-300 border-b-3 border-transparent transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap" onclick="showTab(event, 'fertilizer')">
+                    <span class="flex items-center gap-2">
+                        🧪 <span class="hidden sm:inline">Fertilizer Calculator</span>
+                    </span>
+                </button>
+                <button class="tab-button flex-shrink-0 py-4 px-6 font-medium text-gray-600 dark:text-gray-300 border-b-3 border-transparent transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-800 whitespace-nowrap" onclick="showTab(event, 'prices')">
+                    <span class="flex items-center gap-2">
+                        💰 <span class="hidden sm:inline">Market Prices</span>
+                    </span>
+                </button>
             </nav>
         </div>
 
-        <!-- Disease Detection Tab -->
-        <div id="disease-tab" class="tab-content active">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Plant Disease Detection</h2>
-            <div class="text-center">
-                <input type="file" id="diseaseUpload" class="mb-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="previewImage('disease')"/>
-                <button onclick="predictImage('disease')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition text-lg">Predict Disease</button>
-                <div class="loader" id="diseaseLoader"></div>
-                <div id="diseaseResult" class="mt-4 text-xl font-medium text-gray-800 min-h-[3rem]"></div>
-                <img id="diseaseImage" class="mt-4 mx-auto rounded-lg max-h-64 hidden shadow-md"/>
-            </div>
-        </div>
-
-        <!-- Weed Detection Tab -->
-        <div id="weed-tab" class="tab-content">
-             <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Weed & Seedling Identification</h2>
-            <div class="text-center">
-                <input type="file" id="weedUpload" class="mb-4 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100" onchange="previewImage('weed')"/>
-                <button onclick="predictImage('weed')" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition text-lg">Identify Plant</button>
-                <div class="loader" id="weedLoader"></div>
-                <div id="weedResult" class="mt-4 text-xl font-medium text-gray-800 min-h-[3rem]"></div>
-                <img id="weedImage" class="mt-4 mx-auto rounded-lg max-h-64 hidden shadow-md"/>
-            </div>
-        </div>
-
-        <!-- Crop Recommendation Tab (Restored UI) -->
-        <div id="recommend-tab" class="tab-content">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Crop Recommendation</h2>
-            <p class="text-center text-gray-500 mb-6">Enter your field's conditions to get the best crop recommendations.</p>
-            <div class="text-center mb-4">
-                 <button onclick="getLiveWeather()" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg>
-                    Fetch Live Weather for My Location
-                </button>
-            </div>
-            <form id="recommendForm" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                <!-- User Inputs -->
-                <div><label class="block text-sm font-medium text-gray-700">State</label><select name="STNAME" id="stateSelect" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">{% for state in states %}<option value="{{ state }}">{{ state }}</option>{% endfor %}</select></div>
-                <div><label class="block text-sm font-medium text-gray-700">Season</label><select name="Season" id="seasonSelect" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"><option>Kharif</option><option>Rabi</option><option>Summer</option></select></div>
-                <div><label class="block text-sm font-medium text-gray-700">Year</label><input type="number" step="1" name="Year" value="2025" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Avg. Max Temp (°C)</label><input type="number" step="0.1" name="T2M_MAX" value="32.0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Avg. Min Temp (°C)</label><input type="number" step="0.1" name="T2M_MIN" value="20.0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Avg. Relative Humidity (%)</label><input type="number" step="0.1" name="RH2M" value="55.0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Avg. Daily Precipitation (mm)</label><input type="number" step="0.1" name="PRECTOTCORR" value="3.0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Wind Speed (m/s)</label><input type="number" step="0.1" name="WS2M" value="2.0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Soil pH</label><input type="number" step="0.1" name="phh2o" value="7.0" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Organic Carbon (g/kg)</label><input type="number" step="1" name="soc" value="150" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Sand Content (g/kg)</label><input type="number" step="1" name="sand" value="350" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Silt Content (g/kg)</label><input type="number" step="1" name="silt" value="350" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Clay Content (g/kg)</label><input type="number" step="1" name="clay" value="300" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Nitrogen (mg/kg)</label><input type="number" step="1" name="nitrogen" value="150" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">CEC (cmol/kg)</label><input type="number" step="1" name="cec" value="200" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-
-                <div class="md:col-span-2 text-center pt-4">
-                    <button type="button" onclick="recommendCrop()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg transition text-lg">Recommend Crops</button>
+        <!-- Tab Content -->
+        <div class="p-8">
+            <!-- Disease Detection Tab -->
+            <div id="disease-tab" class="tab-content active">
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full mb-4">
+                            <span class="text-3xl">🩺</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Plant Disease Detection</h2>
+                        <p class="text-gray-600 dark:text-gray-400">Upload a leaf image to identify diseases and get treatment recommendations</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Plant Image</label>
+                            <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-brand-500 dark:hover:border-brand-400 transition-colors duration-300 bg-gray-50 dark:bg-gray-800/50">
+                                <input type="file" id="diseaseUpload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewImage('disease')" accept="image/*"/>
+                                <div class="pointer-events-none">
+                                    <div class="mx-auto h-12 w-12 rounded-full bg-brand-100 dark:bg-brand-900/30 grid place-items-center text-2xl mb-4">📷</div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag & drop or click to select an image</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+                                </div>
+                            </div>
+                            <div id="diseasePreview" class="hidden mt-4">
+                                <img id="diseaseImage" class="mx-auto rounded-lg max-h-64 object-contain border border-gray-200 dark:border-gray-700 shadow-md" alt="Preview"/>
+                            </div>
+                        </div>
+                        
+                        <button onclick="predictImage('disease')" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-8 py-4 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="text-xl">🔍</span>
+                            Analyze Disease
+                        </button>
+                        
+                        <div class="loader hidden" id="diseaseLoader"></div>
+                        <div id="diseaseResult" class="result-card hidden"></div>
+                    </div>
                 </div>
-            </form>
-            <div class="loader" id="recommendLoader"></div>
-            <div id="recommendResult" class="mt-4 text-center min-h-[3rem]"></div>
-        </div>
-        
-        <!-- Fertilizer Calculator Tab -->
-        <div id="fertilizer-tab" class="tab-content">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Fertilizer Recommendation</h2>
-            <form id="fertilizerForm" class="max-w-md mx-auto grid grid-cols-1 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Select Crop:</label>
-                    <select name="crop" id="fertilizerCropSelect" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                         {% for crop in fertilizer_crops %}
-                        <option value="{{ crop }}">{{ crop }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div><label class="block text-sm font-medium text-gray-700">Current Nitrogen (N) in Soil (kg/ha)</label><input type="number" name="n" value="50" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Current Phosphorus (P) in Soil (kg/ha)</label><input type="number" name="p" value="30" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                <div><label class="block text-sm font-medium text-gray-700">Current Potassium (K) in Soil (kg/ha)</label><input type="number" name="k" value="30" class="mt-1 block w-full p-2 border border-gray-300 rounded-md"></div>
-                 <div class="text-center pt-4">
-                    <button type="button" onclick="calculateFertilizer()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-lg transition text-lg">Calculate Needs</button>
-                </div>
-            </form>
-            <div class="loader" id="fertilizerLoader"></div>
-            <div id="fertilizerResult" class="mt-6 text-center"></div>
-        </div>
-
-        <!-- Market Prices Tab -->
-        <div id="prices-tab" class="tab-content">
-            <h2 class="text-2xl font-semibold text-center text-gray-700 mb-4">Market Prices</h2>
-            <div class="flex justify-center items-end gap-4 mb-6">
-                <div class="flex-grow">
-                    <label for="priceStateSelect" class="block text-sm font-medium text-gray-700">State:</label>
-                    <select id="priceStateSelect" class="mt-1 block w-full p-2 border border-gray-300 rounded-md">
-                        {% for state in states %}<option value="{{ state }}">{{ state }}</option>{% endfor %}
-                    </select>
-                </div>
-                <button onclick="getMarketPrices()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-lg transition">Fetch Prices</button>
             </div>
-            <div class="loader" id="pricesLoader"></div>
-            <div id="pricesResult" class="mt-4">
-                <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commodity</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Market</th><th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price (per Quintal)</th></tr></thead><tbody id="pricesTableBody" class="bg-white divide-y divide-gray-200"></tbody></table>
+
+            <!-- Weed Detection Tab -->
+            <div id="weed-tab" class="tab-content">
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full mb-4">
+                            <span class="text-3xl">🌿</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Weed & Seedling Identification</h2>
+                        <p class="text-gray-600 dark:text-gray-400">Identify common weeds and crop seedlings from your field images</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Plant Image</label>
+                            <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-brand-500 dark:hover:border-brand-400 transition-colors duration-300 bg-gray-50 dark:bg-gray-800/50">
+                                <input type="file" id="weedUpload" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewImage('weed')" accept="image/*"/>
+                                <div class="pointer-events-none">
+                                    <div class="mx-auto h-12 w-12 rounded-full bg-brand-100 dark:bg-brand-900/30 grid place-items-center text-2xl mb-4">📷</div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag & drop or click to select an image</p>
+                                    <p class="text-xs text-gray-500">PNG, JPG up to 10MB</p>
+                                </div>
+                            </div>
+                            <div id="weedPreview" class="hidden mt-4">
+                                <img id="weedImage" class="mx-auto rounded-lg max-h-64 object-contain border border-gray-200 dark:border-gray-700 shadow-md" alt="Preview"/>
+                            </div>
+                        </div>
+                        
+                        <button onclick="predictImage('weed')" class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-4 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span class="text-xl">🔍</span>
+                            Identify Plant
+                        </button>
+                        
+                        <div class="loader hidden" id="weedLoader"></div>
+                        <div id="weedResult" class="result-card hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Crop Recommendation Tab -->
+            <div id="recommend-tab" class="tab-content">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-full mb-4">
+                            <span class="text-3xl">🌾</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Crop Recommendation</h2>
+                        <p class="text-gray-600 dark:text-gray-400">Get AI-powered crop suggestions based on your field conditions</p>
+                    </div>
+                    
+                    <div class="mb-6 text-center">
+                        <button onclick="getLiveWeather()" class="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            <span class="text-xl">📍</span>
+                            Fetch Live Weather for My Location
+                        </button>
+                    </div>
+                    
+                    <form id="recommendForm" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <!-- Location & Season -->
+                            <div class="space-y-4">
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-lg border-b border-gray-200 dark:border-gray-600 pb-2">📍 Location & Season</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">State</label>
+                                    <select name="STNAME" id="stateSelect" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                        {% for state in states %}
+                                        <option value="{{ state }}">{{ state }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Season</label>
+                                    <select name="Season" id="seasonSelect" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                        <option>Kharif</option>
+                                        <option>Rabi</option>
+                                        <option>Summer</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year</label>
+                                    <input type="number" step="1" name="Year" value="2025" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <!-- Weather Conditions -->
+                            <div class="space-y-4">
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-lg border-b border-gray-200 dark:border-gray-600 pb-2">🌤️ Weather</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Avg. Max Temp (°C)</label>
+                                    <input type="number" step="0.1" name="T2M_MAX" value="32.0" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Avg. Min Temp (°C)</label>
+                                    <input type="number" step="0.1" name="T2M_MIN" value="20.0" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Relative Humidity (%)</label>
+                                    <input type="number" step="0.1" name="RH2M" value="55.0" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Daily Precipitation (mm)</label>
+                                    <input type="number" step="0.1" name="PRECTOTCORR" value="3.0" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Wind Speed (m/s)</label>
+                                    <input type="number" step="0.1" name="WS2M" value="2.0" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                            </div>
+
+                            <!-- Soil Conditions -->
+                            <div class="space-y-4">
+                                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-lg border-b border-gray-200 dark:border-gray-600 pb-2">🌱 Soil Properties</h3>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Soil pH</label>
+                                    <input type="number" step="0.1" name="phh2o" value="7.0" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Organic Carbon (g/kg)</label>
+                                    <input type="number" step="1" name="soc" value="150" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sand Content (g/kg)</label>
+                                    <input type="number" step="1" name="sand" value="350" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Silt Content (g/kg)</label>
+                                    <input type="number" step="1" name="silt" value="350" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clay Content (g/kg)</label>
+                                    <input type="number" step="1" name="clay" value="300" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nitrogen (mg/kg)</label>
+                                    <input type="number" step="1" name="nitrogen" value="150" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">CEC (cmol/kg)</label>
+                                    <input type="number" step="1" name="cec" value="200" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center pt-6 border-t border-gray-200 dark:border-gray-600 mt-6">
+                            <button type="button" onclick="recommendCrop()" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white px-8 py-4 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <span class="text-xl">🤖</span>
+                                Get Crop Recommendations
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="loader hidden" id="recommendLoader"></div>
+                    <div id="recommendResult" class="result-card hidden"></div>
+                </div>
+            </div>
+            <!-- Fertilizer Calculator Tab -->
+            <div id="fertilizer-tab" class="tab-content">
+                <div class="max-w-2xl mx-auto">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full mb-4">
+                            <span class="text-3xl">🧪</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Fertilizer Recommendation</h2>
+                        <p class="text-gray-600 dark:text-gray-400">Calculate optimal N-P-K fertilizer needs based on your crop and current soil conditions</p>
+                    </div>
+                    
+                    <form id="fertilizerForm" class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Crop</label>
+                            <select name="crop" id="fertilizerCropSelect" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                {% for crop in fertilizer_crops %}
+                                <option value="{{ crop }}">{{ crop }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Nitrogen (N)</label>
+                                <div class="relative">
+                                    <input type="number" name="n" value="50" class="w-full p-3 pr-16 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                    <span class="absolute right-3 top-3 text-sm text-gray-500">kg/ha</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Phosphorus (P)</label>
+                                <div class="relative">
+                                    <input type="number" name="p" value="30" class="w-full p-3 pr-16 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                    <span class="absolute right-3 top-3 text-sm text-gray-500">kg/ha</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Current Potassium (K)</label>
+                                <div class="relative">
+                                    <input type="number" name="k" value="30" class="w-full p-3 pr-16 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                    <span class="absolute right-3 top-3 text-sm text-gray-500">kg/ha</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center pt-4">
+                            <button type="button" onclick="calculateFertilizer()" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-8 py-4 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                <span class="text-xl">🧮</span>
+                                Calculate Fertilizer Needs
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <div class="loader hidden" id="fertilizerLoader"></div>
+                    <div id="fertilizerResult" class="result-card hidden"></div>
+                </div>
+            </div>
+
+            <!-- Market Prices Tab -->
+            <div id="prices-tab" class="tab-content">
+                <div class="max-w-4xl mx-auto">
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 bg-teal-100 dark:bg-teal-900/30 rounded-full mb-4">
+                            <span class="text-3xl">💰</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Live Market Prices</h2>
+                        <p class="text-gray-600 dark:text-gray-400">Check current commodity prices to make informed selling decisions</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 mb-6">
+                        <div class="flex flex-col sm:flex-row gap-4 items-end">
+                            <div class="flex-1">
+                                <label for="priceStateSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select State</label>
+                                <select id="priceStateSelect" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                                    {% for state in states %}
+                                    <option value="{{ state }}">{{ state }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button onclick="getMarketPrices()" class="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white px-6 py-3 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap">
+                                <span class="text-lg">📊</span>
+                                Fetch Prices
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="loader hidden" id="pricesLoader"></div>
+                    
+                    <div id="pricesResult" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50 dark:bg-gray-900/50">
+                                    <tr>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Commodity</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Market</th>
+                                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Price (per Quintal)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pricesTableBody" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                            Select a state and click "Fetch Prices" to view current market rates
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
     </div>
-
-    <script>
-        // --- All JavaScript functions are now included ---
-        function showTab(event, tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
-
-        function previewImage(type) {
-            const fileInput = document.getElementById(`${type}Upload`);
-            const imageEl = document.getElementById(`${type}Image`);
-            if (fileInput.files[0]) {
-                imageEl.src = URL.createObjectURL(fileInput.files[0]);
-                imageEl.classList.remove('hidden');
-            }
-        }
-
-        async function predictImage(type) {
-            const resultDiv = document.getElementById(`${type}Result`);
-            const loader = document.getElementById(`${type}Loader`);
-            const fileInput = document.getElementById(`${type}Upload`);
-            
-            if (!fileInput.files[0]) {
-                resultDiv.textContent = 'Please select an image.'; return;
-            }
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-
-            resultDiv.innerHTML = '';
-            loader.style.display = 'block';
-
-            try {
-                const endpoint = type === 'disease' ? '/predict_disease' : '/predict_weed';
-                const response = await fetch(endpoint, { method: 'POST', body: formData });
-                const data = await response.json();
-                
-                const confidenceThreshold = 0.98;
-                if (data.error) {
-                    resultDiv.textContent = `Error: ${data.error}`;
-                } else if (data.confidence < confidenceThreshold) {
-                    resultDiv.textContent = "Could not identify with high confidence. Please upload a clearer image.";
-                } else {
-                    const confidencePercent = (data.confidence * 100).toFixed(2);
-                    resultDiv.innerHTML = `Prediction: <span class="text-indigo-600 font-bold">${data.prediction}</span><br><span class="text-sm text-gray-500">(${confidencePercent}% confident)</span>`;
-                }
-            } catch (error) {
-                resultDiv.textContent = 'An error occurred. Please try again.';
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-
-        async function recommendCrop() {
-            const resultDiv = document.getElementById('recommendResult');
-            const loader = document.getElementById('recommendLoader');
-            const form = document.getElementById('recommendForm');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-            
-            resultDiv.innerHTML = '';
-            loader.style.display = 'block';
-
-            try {
-                const response = await fetch('/recommend_crop', {
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const resultData = await response.json();
-
-                if (resultData.error) {
-                    resultDiv.textContent = `Error: ${resultData.error}`;
-                } else {
-                    let html = '<h3 class="text-xl font-semibold text-gray-800 mb-2">Top 3 Recommended Crops:</h3><ol class="list-decimal list-inside text-left inline-block">';
-                    resultData.recommendations.forEach(rec => {
-                        html += `<li class="text-lg"><span class="font-bold text-green-600">${rec.crop}</span> <span class="text-gray-500 text-sm">(${rec.confidence}% match)</span></li>`;
-                    });
-                    html += '</ol>';
-                    resultDiv.innerHTML = html;
-                }
-            } catch (error) {
-                resultDiv.textContent = 'An error occurred. Please try again.';
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-        
-        async function getLiveWeather() {
-            const recommendForm = document.getElementById('recommendForm');
-            const button = document.querySelector('button[onclick="getLiveWeather()"]');
-            button.disabled = true;
-            button.innerHTML = '<div class="loader" style="width:20px; height:20px; display:inline-block; border-top-color: white;"></div> Fetching...';
-
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const { latitude, longitude } = position.coords;
-                const response = await fetch('/get_live_weather', {
-                    method: 'POST',
-                    body: JSON.stringify({ lat: latitude, lon: longitude }),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const weather = await response.json();
-                
-                if (weather.error) {
-                    alert('Could not fetch weather data.');
-                } else {
-                    recommendForm.querySelector('[name="T2M_MAX"]').value = weather.T2M_MAX.toFixed(1);
-                    recommendForm.querySelector('[name="T2M_MIN"]').value = weather.T2M_MIN.toFixed(1);
-                    recommendForm.querySelector('[name="RH2M"]').value = weather.RH2M.toFixed(1);
-                    recommendForm.querySelector('[name="PRECTOTCORR"]').value = weather.PRECTOTCORR.toFixed(1);
-                    recommendForm.querySelector('[name="WS2M"]').value = weather.WS2M.toFixed(1);
-                }
-                button.disabled = false;
-                button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg> Fetch Live Weather for My Location';
-            }, () => {
-                alert('Could not get your location. Please enable location services.');
-                button.disabled = false;
-                button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" /></svg> Fetch Live Weather for My Location';
-            });
-        }
-
-        async function calculateFertilizer() {
-            const resultDiv = document.getElementById('fertilizerResult');
-            const loader = document.getElementById('fertilizerLoader');
-            const form = document.getElementById('fertilizerForm');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-            resultDiv.innerHTML = '';
-            loader.style.display = 'block';
-
-            try {
-                const response = await fetch('/calculate_fertilizer', {
-                    method: 'POST',
-                    body: JSON.stringify(data),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const resultData = await response.json();
-
-                if (resultData.error) {
-                    resultDiv.textContent = `Error: ${resultData.error}`;
-                } else {
-                    let html = `<h3 class="text-xl font-semibold text-gray-800 mb-2">Recommended Nutrients to Add (kg/ha):</h3>
-                                <ul class="text-left inline-block space-y-2">
-                                    <li class="text-lg">Nitrogen (N): <span class="font-bold text-green-600">${resultData.n_needed}</span></li>
-                                    <li class="text-lg">Phosphorus (P): <span class="font-bold text-green-600">${resultData.p_needed}</span></li>
-                                    <li class="text-lg">Potassium (K): <span class="font-bold text-green-600">${resultData.k_needed}</span></li>
-                                </ul>`;
-                    resultDiv.innerHTML = html;
-                }
-            } catch (error) {
-                resultDiv.textContent = 'An error occurred. Please try again.';
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-        
-        async function getMarketPrices() {
-            const tableBody = document.getElementById('pricesTableBody');
-            const loader = document.getElementById('pricesLoader');
-            const state = document.getElementById('priceStateSelect').value;
-            
-            tableBody.innerHTML = '';
-            loader.style.display = 'block';
-
-            try {
-                const response = await fetch('/get_market_prices', {
-                    method: 'POST',
-                    body: JSON.stringify({ state: state }),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                const data = await response.json();
-
-                if (data.error) {
-                    tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-red-500 py-4">Error: ${data.error}</td></tr>`;
-                } else if (data.prices.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-gray-500 py-4">No recent price data found for ${state}.</td></tr>`;
-                } else {
-                    let rows = '';
-                    data.prices.forEach(record => {
-                        rows += `<tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${record.commodity}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${record.market}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-semibold">₹ ${record.price}</td>
-                                 </tr>`;
-                    });
-                    tableBody.innerHTML = rows;
-                }
-            } catch (error) {
-                tableBody.innerHTML = `<tr><td colspan="3" class="text-center text-red-500 py-4">An error occurred. Please try again.</td></tr>`;
-            } finally {
-                loader.style.display = 'none';
-            }
-        }
-    </script>
-</body>
-</html>
+</div>
+{% endblock %}
 
